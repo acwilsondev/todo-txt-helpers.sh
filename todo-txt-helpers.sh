@@ -38,15 +38,25 @@ function todo-head() {
 
 
 function todo-x() {
-  # remove pri
-  sed -i "${1}s/^\([A-Z]\) //" "$TODO_FILE"
-  # add x and completion date
-  sed -i "${1}s/^/x $(date +%Y-%m-%d) /" $TODO_FILE
+  if [ "$#" -eq 0 ]; then
+    echo "Usage: todo-x LINE [LINE ...]"
+    return 1
+  fi
+
+  local today
+  today=$(date +%Y-%m-%d)
+
+  for n in "$@"; do
+    # remove priority (if present)
+    sed -i "${n}s/^\([A-Z]\) //" "$TODO_FILE"
+    # prefix line with completion mark and date
+    sed -i "${n}s/^/x $today /" "$TODO_FILE"
+  done
+
   if [ "$AUTOSORT_TODO" = true ]; then
     todo-sort
   fi
 }
-
 
 function todo-add() {
   echo "$1" >> "$TODO_FILE"
@@ -64,11 +74,23 @@ alias -- todo-contexts='grep -oE "@[a-zA-Z0-9_\-]+" $TODO_FILE | sort | uniq -c 
 
 # delete nth task
 function todo-rm() {
-  sed -i "${1}d" "$TODO_FILE"
+  if [ "$#" -eq 0 ]; then
+    echo "Usage: todo-rm LINE [LINE ...]"
+    return 1
+  fi
+
+  # Build sed delete expression like '5d;10d;12d'
+  local sed_expr=""
+  for n in "$@"; do
+    sed_expr+="${n}d;"
+  done
+
+  sed -i "$sed_expr" "$TODO_FILE"
 }
+
 # archive done tasks
 function todo-archive() {
-  grep '^x ' "$TODO_FILE" >> "$DONE_FILE"
+  grep '^x ' "$TODO_FILE" >> "$TODO_DONE_FILE"
   sed -i '/^x /d' "$TODO_FILE"
 }
 
@@ -95,10 +117,10 @@ alias todo-sort      # sort and deduplicate the todo file (per todo.txt spec)
 
 # Add / remove / complete tasks:
 todo-add "your task"         # append task to file, then autosort if enabled
-todo-x N                     # mark task N as done (adds date, removes priority)
-todo-rm N                    # delete task N (by line number)
+todo-x N+                    # mark tasks N as done (adds date, removes priority)
+todo-rm N+                   # delete tasks N (by line number)
 todo-head N                  # print first N tasks with line numbers
-todo-archive                 # move all done tasks (starting with 'x ') to $DONE_FILE
+todo-archive                 # move all done tasks (starting with 'x ') to $TODO_DONE_FILE
 
 # Reports:
 alias todo-priorities  # count of tasks by priority (A, B, C, etc.)
