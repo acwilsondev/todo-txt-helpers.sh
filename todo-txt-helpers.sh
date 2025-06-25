@@ -47,8 +47,8 @@ function todo-x() {
   today=$(date +%Y-%m-%d)
 
   for n in "$@"; do
-    # remove priority (if present)
-    sed -i "${n}s/^\([A-Z]\) //" "$TODO_FILE"
+    # remove priority marker (if present)
+    sed -i "${n}s/^ *(\([A-Z]\)) //" "$TODO_FILE"
     # prefix line with completion mark and date
     sed -i "${n}s/^/x $today /" "$TODO_FILE"
   done
