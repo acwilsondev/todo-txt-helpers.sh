@@ -4,18 +4,24 @@ export COLORIZE_TODO="true"
 
 
 todo-highlight-priorities() {
+  MAGENTA="$(printf '\033[1;35m')"
   RED="$(printf '\033[1;31m')"          # Bright red
   ORANGE="$(printf '\033[38;5;208m')"   # ANSI 256-color orange
   YELLOW="$(printf '\033[1;33m')"       # Bright yellow
-  DIM="$(printf '\033[2;38;5;240m')"
-  RESET="$(printf '\033[0m')"           # Reset all styles
+  DIM="$(printf '\033[2m')"
+  RESET="$(printf '\033[0m')"
+  GRAY="$(printf '\033[38;5;239m')"
+  BLUE="$(printf '\033[34m')"
 
   if [ "$COLORIZE_TODO" = "true" ]; then
     sed -E \
+      -e "s/^(\(\*\))/${MAGENTA}\1${RESET}/" \
       -e "s/^(\(A\))/${RED}\1${RESET}/" \
       -e "s/^(\(B\))/${ORANGE}\1${RESET}/" \
       -e "s/^(\(C\))/${YELLOW}\1${RESET}/" \
-      -e "s/^(x .*)/${DIM}\1${RESET}/"
+      -e "s/^(\([D-Z]\) .*)/${DIM}\1${RESET}/" \
+      -e "s/(\+.*)/${BLUE}\1${RESET}/" \
+      -e "s/^(x .*)/${GRAY}${DIM}\1${RESET}/"
   else
     cat
   fi
@@ -26,10 +32,11 @@ alias -- todo-sort='sort -u $TODO_FILE -o $TODO_FILE'
 alias -- todo-edit='$EDITOR $TODO_FILE' # open todo file in your editor
 alias -- todo-next='head -n 1 $TODO_FILE | todo-highlight-priorities | nl' # show top one task
 alias -- todo-ls='cat $TODO_FILE | todo-highlight-priorities | nl' # show top five tasks
-alias -- todo-ls-all='cat $TODO_FILE | todo-highlight-priorities | nl' # show everything
-alias -- todo-grep='cat $TODO_FILE | todo-highlight-priorities | nl | grep' # find tasks matching the given input
-alias -- todo-due='cat $TODO_FILE | todo-highlight-priorities | nl grep "due:"' # show all tasks with a due date
-
+alias -- todo-grep='todo-ls | grep' # find tasks matching the given input
+alias -- todo-due='todo-ls | grep "due:"' # show all tasks with a due date
+alias -- todo-wc='wc -l $TODO_FILE'
+alias -- todo-inbox='todo-ls | grep "(*)"'
+alias -- todo-easy='todo-ls | grep -E "effort:(S|XS)"'
 
 # Mark a task as done
 function todo-head() {
@@ -48,7 +55,7 @@ function todo-x() {
 
   for n in "$@"; do
     # remove priority marker (if present)
-    sed -i "${n}s/^ *(\([A-Z]\)) //" "$TODO_FILE"
+    sed -i "${n}s/^ *(\([A-Z\*]\)) //" "$TODO_FILE"
     # prefix line with completion mark and date
     sed -i "${n}s/^/x $today /" "$TODO_FILE"
   done
@@ -58,14 +65,16 @@ function todo-x() {
   fi
 }
 
+
 function todo-add() {
-  echo "$1" >> "$TODO_FILE"
-  if [ "$AUTOSORT_TODO" = true ]; 
-  then 
-    todo-sort 
+  local today
+  today=$(date +%Y-%m-%d)
+  echo "(*) $today $*" >> "$TODO_FILE"
+
+  if [ "$AUTOSORT_TODO" = true ]; then
+    todo-sort
   fi
 }
-
 
 # Todo.txt report alias
 alias -- todo-priorities='grep -oE "^\([A-Z]\)" $TODO_FILE | sort | uniq -c'
