@@ -37,12 +37,7 @@ alias -- todo-due='todo-ls | grep "due:"' # show all tasks with a due date
 alias -- todo-wc='wc -l $TODO_FILE'
 alias -- todo-inbox='todo-ls | grep "(*)"'
 alias -- todo-easy='todo-ls | grep -E "effort:(S|XS)"'
-
-# Mark a task as done
-function todo-head() {
-  head -n "$1" $TODO_FILE | nl 
-}
-
+alias -- todo-head='todo-ls | head'
 
 function todo-x() {
   if [ "$#" -eq 0 ]; then
