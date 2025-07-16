@@ -20,7 +20,8 @@ todo-highlight-priorities() {
       -e "s/^(\(B\))/${ORANGE}\1${RESET}/" \
       -e "s/^(\(C\))/${YELLOW}\1${RESET}/" \
       -e "s/^(\([D-Z]\) .*)/${DIM}\1${RESET}/" \
-      -e "s/(\+.*)/${BLUE}\1${RESET}/" \
+      -e "s/(\+[a-zA-Z0-9_-]+)/${RESET}${BLUE}\1${RESET}/" \
+      -e "s/(@[a-zA-Z0-9_-]+)/${RESET}${BLUE}\1${RESET}/" \
       -e "s/^(x .*)/${GRAY}${DIM}\1${RESET}/"
   else
     cat
@@ -38,6 +39,7 @@ alias -- todo-wc='wc -l $TODO_FILE'
 alias -- todo-inbox='todo-ls | grep "(*)"'
 alias -- todo-easy='todo-ls | grep -E "effort:(S|XS)"'
 alias -- todo-head='todo-ls | head'
+alias -- todo-recur='$EDITOR $TODO_RECUR_FILE'
 
 function todo-x() {
   if [ "$#" -eq 0 ]; then
