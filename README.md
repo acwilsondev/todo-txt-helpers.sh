@@ -1,34 +1,88 @@
 # Todo.txt Helpers
 
-Simple shell aliases and functions for managing todo.txt files.
+A unified command-line tool for todo.txt management, converted from sourced aliases and functions to a standalone program.
+
+## Installation
+
+### System-wide installation (requires sudo)
+```bash
+sudo ./install.sh
+```
+
+### User-local installation
+```bash
+INSTALL_DIR=~/.local/bin ./install.sh
+```
+
+Make sure the installation directory is in your PATH.
+
+## Configuration
+
+Set the required environment variables in your shell configuration file (e.g., `~/.zshrc`):
+
+```bash
+export TODO_FILE=~/todo.txt
+export TODO_DONE_FILE=~/done.txt
+export TODO_RECUR_FILE=~/recur.txt  # optional
+export AUTOSORT_TODO=true           # optional, defaults to true
+export COLORIZE_TODO=true           # optional, defaults to true
+```
 
 ## Usage
 
-1. Source the script in your shell:
-   ```bash
-   source todo-txt-helpers.sh
-   ```
+Run `todo-txt-helpers help` to see all available commands.
 
-2. Set your todo file location:
-   ```bash
-   export TODO_FILE="/path/to/your/todo.txt"
-   export TODO_DONE_FILE="/path/to/your/done.txt"
-   ```
+### Examples
 
-3. Use the commands:
-   - `todo-ls` - view your todo list
-   - `todo-add "task"` - add a new task
-   - `todo-x N` - mark task N as done
-   - `todo-help` - see all available commands
+```bash
+# View tasks
+todo-txt-helpers ls                    # show all tasks
+todo-txt-helpers next                  # show top task
+todo-txt-helpers head 10               # show first 10 tasks
+todo-txt-helpers grep "project"        # search for tasks containing "project"
+todo-txt-helpers due                   # show tasks with due dates
+todo-txt-helpers inbox                 # show inbox tasks (*)
+
+# Add and manage tasks
+todo-txt-helpers add "New task description"
+todo-txt-helpers x 1 3 5               # mark tasks 1, 3, and 5 as done
+todo-txt-helpers rm 2                  # delete task 2
+todo-txt-helpers archive               # move completed tasks to done file
+
+# Reports
+todo-txt-helpers priorities            # count tasks by priority
+todo-txt-helpers projects              # count tasks by project
+todo-txt-helpers contexts              # count tasks by context
+
+# Edit files
+todo-txt-helpers edit                  # open todo file in editor
+todo-txt-helpers recur                 # edit recurring tasks file
+```
+
+## Migration from Sourced Script
+
+If you were previously sourcing `todo-txt-helpers.sh`, you can now:
+
+1. Remove the `source todo-txt-helpers.sh` line from your shell configuration
+2. Install this standalone program using the instructions above
+3. Update any scripts or aliases that used the old function names:
+   - `todo-add` → `todo-txt-helpers add`
+   - `todo-x` → `todo-txt-helpers x`
+   - `todo-ls` → `todo-txt-helpers ls`
+   - etc.
 
 ## Features
 
-- Color-coded priorities (A=red, B=orange, C=yellow)
-- Auto-sorting after adding/completing tasks
-- Project and context tracking
-- Task archiving
+- **Colored output**: Priority-based coloring (A=red, B=orange, C=yellow, etc.)
+- **Automatic sorting**: Optionally sort todo file after modifications
+- **Line numbers**: All listing commands show line numbers for easy reference
+- **Flexible installation**: Install system-wide or user-local
+- **Environment variable support**: Configurable via environment variables
+- **Todo.txt spec compliance**: Follows the todo.txt format specification
 
-For complete usage info, run `todo-help` after sourcing the script.
+## Original Script
+
+The original `todo-txt-helpers.sh` script with aliases and functions has been backed up and converted to this standalone program.
 
 ## Recurring Tasks for `todo.txt`
 
